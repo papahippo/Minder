@@ -12,6 +12,10 @@ class Test:
     exec_dir = ''  # default = find executables via path mechanism
     exec_file = 'ping' #'echo'  # stub for initial testing
     showOut = True
+    times_over = 1
+
+    def get_flavours(self):
+        return [('-c', '4', 'localhost'), ('absenthost',),]
 
     def cmd(self, *pp):
         print(pp)
@@ -29,9 +33,39 @@ class Test:
         for line in iter(process.stdout.readline, b''):
             output = line.strip().decode('utf8', errors='ignore')
             print(output)
+        return output  # not yet sure we'll be using this...
 
-        return output
+    def analyse(self, time_over):
+        print("sorry, I - %s - don't (yet) do analysis!" % self)
+
+    def summarize(self):
+        print("sorry, I - %s - don't (yet) do summarizing!" % self)
+
+    def prepare(self):
+        pass
+
+    def exercise(self):
+        self.prepare()
+        flavours = self.get_flavours()
+        if not flavours:
+            print("'%s' is not implemented or maybe just not enabled for this platform"
+                  % self.__class__.__name)
+            return
+        for  time_over in range(self.times_over):
+            for flavour in flavours:
+                self.run(*flavour)
+            self.analyse(time_over)
+        self.summarize()
+
+    def main(self):
+        print ("running %s" % sys.argv.pop(0))
+        if sys.argv:
+            self.run(*sys.argv)
+        else:
+            self.exercise()
+
 
 if __name__ == "__main__":
     test = Test()
-    test.run(*sys.argv[1:])
+    test.main()
+
