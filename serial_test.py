@@ -5,7 +5,7 @@ import base_test
 
 
 class SerialTest(base_test.Test):
-    exec_dir = '~/bin/'  # under review
+    exec_dir = './bin/'  # under review
     exec_file = 'linux-serial-test'
     showOut = True
 
