@@ -16,7 +16,6 @@ class kernel_counts:
     pass
 
 
-
 def main():
     port = '/dev/ttyS1'
     with open('/home/lmyerscough/log/serialhammer1.log', 'r') as log:

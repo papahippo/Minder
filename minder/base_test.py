@@ -8,7 +8,7 @@ import sys, os, subprocess
 dbg_print = (int(os.getenv('MINDER_DBG', 0)) and print) or (lambda *pp, **kw: None)
 
 
-class Test:
+class BaseTest:
     exec_dir = ''  # default = find executables via path mechanism
     exec_file = 'ping' #'echo'  # stub for initial testing
     showOut = True
@@ -66,6 +66,6 @@ class Test:
 
 
 if __name__ == "__main__":
-    test = Test()
+    test = BaseTest()
     test.main()
 
