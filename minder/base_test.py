@@ -18,24 +18,29 @@ class BaseTest:
         return [('-c', '4', 'localhost'), ('absenthost',),]
 
     def cmd(self, *pp):
-        dbg_print(pp)
+        print(pp)
         answer = (('stdbuf', '-o0', self.exec_dir + self.exec_file,)
-                  + tuple(map(str, pp)))
+            + tuple(map(str, pp)))
         dbg_print("External.cmd answer = ", answer)
         return answer
+
+    def fixup(self, output, error):
+        return output, error
 
     def process_output(self, output):
         pass  # stub
 
+
     def run(self, *args):
         cmd1 = self.cmd(*args)
-        print ("will run: ", cmd1)
-        # process = subprocess.Popen(cmd1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        process = subprocess.Popen(cmd1, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        process.wait()
-        for line in iter(process.stdout.readline, b''):
-            output = line.strip().decode('utf8', errors='ignore')
-            print(output)
+        dbg_print (cmd1)
+        process = subprocess.Popen(cmd1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output, error = (pipe.read().decode('utf8', errors='ignore')
+                         for pipe in (process.stdout, process.stdout))
+
+        print ("stdout: \n", output)
+        print ("stderr: \n", error)
+        output, error = self.fixup(output, error)
         return output  # not yet sure we'll be using this...
 
     def analyse(self, time_over):
@@ -52,7 +57,7 @@ class BaseTest:
         flavours = self.get_flavours()
         if not flavours:
             print("'%s' is not implemented or maybe just not enabled for this platform"
-                  % self.__class__.__name)
+                  % self.__class__.__name__)
             return
         for  time_over in range(self.times_over):
             for flavour in flavours:
