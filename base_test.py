@@ -58,7 +58,7 @@ class Test:
         self.summarize()
 
     def main(self):
-        print ("running %s" % sys.argv.pop(0))
+        print("running %s" % sys.argv.pop(0))
         if sys.argv:
             self.run(*sys.argv)
         else:
