@@ -11,8 +11,8 @@ class SerialTest(BaseTest):
     ttyPort = '/dev/ttyUSB0'
 
     def get_flavours(self):
-        #return [('-p', self.ttyPort, '-o', '30', '-i', '35', '-b', str(bit_rate))
-        return [('-p', self.ttyPort, '-o', '3', '-i', '4', '-b', str(bit_rate))
+        #return [('-p', self.ttyPort, '-o', 30, '-i', 35, '-b', bit_rate)
+        return [('-p', self.ttyPort, '-o', 3, '-i', 4, '-b', bit_rate)
                 for bit_rate in self.bit_rates]
 
 

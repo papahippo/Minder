@@ -18,8 +18,9 @@ class BaseTest:
         return [('-c', '4', 'localhost'), ('absenthost',),]
 
     def cmd(self, *pp):
-        print(pp)
-        answer = ('stdbuf', '-o0', self.exec_dir + self.exec_file,) + pp
+        dbg_print(pp)
+        answer = (('stdbuf', '-o0', self.exec_dir + self.exec_file,)
+                  + tuple(map(str, pp)))
         dbg_print("External.cmd answer = ", answer)
         return answer
 
@@ -28,8 +29,10 @@ class BaseTest:
 
     def run(self, *args):
         cmd1 = self.cmd(*args)
-        dbg_print (cmd1)
-        process = subprocess.Popen(cmd1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        print ("will run: ", cmd1)
+        # process = subprocess.Popen(cmd1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(cmd1, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process.wait()
         for line in iter(process.stdout.readline, b''):
             output = line.strip().decode('utf8', errors='ignore')
             print(output)
