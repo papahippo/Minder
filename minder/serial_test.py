@@ -9,11 +9,14 @@ class SerialTest(BaseTest):
     times_over = 2
     bit_rates = (115200, 250000, 500000, 1500000)
     ttyPort = '/dev/ttyUSB0'
-
+    tx_secs = 3  # 30
+    rx_secs = 5  # 35
     def get_flavours(self):
-        #return [('-p', self.ttyPort, '-o', 30, '-i', 35, '-b', bit_rate)
-        return [('-p', self.ttyPort, '-o', 3, '-i', 4, '-b', bit_rate)
-                for bit_rate in self.bit_rates]
+        return self.bit_rates
+
+    def get_args(self, flavour):
+        return ('-p', self.ttyPort, '-o', self.tx_secs, '-i', self.rx_secs,
+                '-b', flavour)
 
 
 if __name__ == "__main__":

@@ -15,7 +15,10 @@ class BaseTest:
     times_over = 1
 
     def get_flavours(self):
-        return [('-c', '4', 'localhost'), ('absenthost',),]
+        return ( 'localhost', 'absenthost')
+
+    def get_args(self, flavour):
+        return ('-c', '4', flavour)
 
     def cmd(self, *pp):
         print(pp)
@@ -41,13 +44,15 @@ class BaseTest:
         print ("stdout: \n", output)
         print ("stderr: \n", error)
         output, error = self.fixup(output, error)
-        return output  # not yet sure we'll be using this...
+        return output
 
-    def analyse(self, time_over):
+    def inspect(self, flavour, output):
         print("sorry, I - %s - don't (yet) do analysis!" % self)
+        return False
 
     def summarize(self):
         print("sorry, I - %s - don't (yet) do summarizing!" % self)
+        return False
 
     def prepare(self):
         pass
@@ -59,10 +64,14 @@ class BaseTest:
             print("'%s' is not implemented or maybe just not enabled for this platform"
                   % self.__class__.__name__)
             return
-        for  time_over in range(self.times_over):
+        self.rows = []
+        for time_over in range(self.times_over):
+            row = []
             for flavour in flavours:
-                self.run(*flavour)
-            self.analyse(time_over)
+                output = self.run(*self.get_args(flavour))
+                column = self.inspect(flavour, output)
+                row.append(column)
+            self.rows.append(row)
         self.summarize()
 
     def main(self):
