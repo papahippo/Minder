@@ -18,7 +18,10 @@ class BaseTest:
     showOut = True
     times_over = 1
     count = 4
+    _title = None
 
+    def get_title(self):
+        return self._title or self.__class__.__name__
     def get_flavours(self):
         return 'localhost', 'absenthost'
 
@@ -58,7 +61,7 @@ class BaseTest:
 
     def inspect(self, flavour, rc, output):
         print("sorry, I - %s - don't (yet) do analysis!" % self)
-        return False
+        return None
 
     def summarize(self):
         return False
@@ -76,23 +79,38 @@ class BaseTest:
         tables = OrderedDict()
         for time_over in range(self.times_over):
             for flavour in flavours:
-                if not time_over:
+                if time_over is 0:
                     style, args_nice = self.arrange_args_for_table(flavour)
                     table = h.table(style=style)
-                    headers, values = (args_nice)
+                    headers, values = args_nice
                     table |= (h.tr() | [(h.th | header) for header in headers])
                     table |= (h.tr() | [(h.td(style="color:blue;text-align:center") | value) for value in values])
-                    print(table, file=self.html_out)
+                    # print(table, file=self.html_out)
                     #sys.exit(42)  # temporary!
                     tables[flavour] = table
                 table = tables[flavour]
                 rc, output = self.run(*self.get_args(flavour))
 
-                style, out_nice = self.inspect(flavour, rc, output)
+                style, (result_headers, result_details) = self.inspect(flavour, rc, output)
+
+                print("result headers, details: ", result_headers, result_details)
+                if time_over is 0:
+                    table |= (h.tr() | (
+                        h.th | 'seqno.',
+                        [(h.th | header) for header in result_headers]
+                    ))
+                table |= (h.tr | (
+                    h.th | (1+time_over),
+                    [(h.td(style="color:blue;text-align:center") |
+                      ('-' if value is None else value)) for value in result_details]
+                ))
                 # row.append(column)
             # self.rows.append(row)
         self.summarize()
-        print(h.p | [v for v in tables.values()], file=self.html_out)
+        print(h.p | (
+            h.h2 | self.get_title(), h.br,
+            [(v, h.br*2) for v in tables.values()]
+        ), file=self.html_out)
 
     def main(self):
         print("running %s" % sys.argv.pop(0))

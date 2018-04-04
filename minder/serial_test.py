@@ -30,8 +30,10 @@ class SerialTest(BaseTest):
     def inspect(self, flavour, rc, output):
         result = re.search(r'session\:\s*rx=(\d+)\D+tx=(\d+)\D+rx\s*err=(\d+)',
                            output)
-        print(result.groups())
-
+        if result is not None:
+            print(result.groups())
+        return "width:100%", (('received', 'transmitted', 'rx errors'),
+                              result and result.groups() or [None]*3)
 
 if __name__ == "__main__":
     test = SerialTest()
