@@ -27,7 +27,7 @@ class SerialTest(BaseTest):
                              ('receive seconds', self.rx_secs),
                              )
 
-    def inspect(self, flavour, rc, output):
+    def inspect(self, flavour, rc, output, stats):
         result = re.search(r'session\:\s*rx=(\d+)\D+tx=(\d+)\D+rx\s*err=(\d+)',
                            output)
         if result is not None:

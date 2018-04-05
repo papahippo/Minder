@@ -60,15 +60,25 @@ class BaseTest:
         output, error = self.fixup(output, error)
         return rc, output
 
-    def inspect(self, flavour, rc, output):
+    def inspect(self, flavour, rc, output, stats):
         print("sorry, I - %s - don't (yet) do analysis!" % self)
         return None
 
-    def summarize(self):
+    def summarize(self, flavour, stats):
         return False
 
     def prepare(self):
-        pass
+        self.accumulator = OrderedDict()
+        for flavour in self.get_flavours():
+            style, args_nice = self.arrange_args_for_table(flavour)
+            table = h.table(style=style)
+            headers, values = args_nice
+            table |= (h.tr() | [(h.th | header) for header in headers])
+            table |= (h.tr() | [(h.td(style="color:blue;text-align:center") | value) for value in values])
+            # print(table, file=self.html_out)
+            # sys.exit(42)  # temporary!
+            stats =list()
+            self.accumulator[flavour] = (table, stats)
 
     def exercise(self):
         self.prepare()
@@ -77,23 +87,11 @@ class BaseTest:
             print("'%s' is not runnable on this platform"
                   % self.get_title())
             return
-        tables = OrderedDict()
+        self.prepare()
         for time_over in range(self.times_over):
-            for flavour in flavours:
-                if time_over is 0:
-                    style, args_nice = self.arrange_args_for_table(flavour)
-                    table = h.table(style=style)
-                    headers, values = args_nice
-                    table |= (h.tr() | [(h.th | header) for header in headers])
-                    table |= (h.tr() | [(h.td(style="color:blue;text-align:center") | value) for value in values])
-                    # print(table, file=self.html_out)
-                    #sys.exit(42)  # temporary!
-                    tables[flavour] = table
-                table = tables[flavour]
+            for flavour, (table, stats) in self.accumulator.items():
                 rc, output = self.run(*self.get_args(flavour))
-
-                style, (result_headers, result_details) = self.inspect(flavour, rc, output)
-
+                style, (result_headers, result_details) = self.inspect(flavour, rc, output, stats)
                 print("result headers, details: ", result_headers, result_details)
                 if time_over is 0:
                     table |= (h.tr() | (
@@ -107,10 +105,12 @@ class BaseTest:
                 ))
                 # row.append(column)
             # self.rows.append(row)
-        self.summarize()
+        for flavour, (table, stats) in self.accumulator.items():
+            self.summarize(flavour, stats)
+
         print(h.p | (
             h.h2 | self.get_title(), h.br,
-            [(v, h.br*2) for v in tables.values()]
+            [(table, h.br*2) for table, stats in self.accumulator.values()]
         ), file=self.html_out)
 
     def main(self):
