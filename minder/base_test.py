@@ -73,8 +73,8 @@ class BaseTest:
             style, args_nice = self.arrange_args_for_table(flavour)
             table = h.table(style=style)
             headers, values = args_nice
-            table |= (h.tr() | [(h.th | header) for header in headers])
-            table |= (h.tr() | [(h.td(style="color:blue;text-align:center") | value) for value in values])
+            table |= (h.tr() | [(h.th(style="background-color: f0c0c0;text-align:center;border: 1px solid #ddd; padding: 8px;") | header) for header in headers])
+            table |= (h.tr() | [(h.td(style="background-color: f0f0f0;text-align:center;border: 1px solid #ddd; padding: 8px;color:blue") | value) for value in values])
             # print(table, file=self.html_out)
             # sys.exit(42)  # temporary!
             stats =list()
@@ -95,16 +95,15 @@ class BaseTest:
                 print("result headers, details: ", result_headers, result_details)
                 if time_over is 0:
                     table |= (h.tr() | (
-                        h.th | 'seqno.',
-                        [(h.th | header) for header in result_headers]
+                        h.th(style="border: 1px solid #ddd; padding: 8px;background-color: a0a0f0;") | 'seqno.',
+                        [(h.th(style="border: 1px solid #ddd; padding: 8px;background-color: a0a0f0;") | header)
+                         for header in result_headers]
                     ))
                 table |= (h.tr | (
-                    h.th | (1+time_over),
-                    [(h.td(style="color:blue;text-align:center") |
+                    h.th(style="background-color: f0f0f0;text-align:center;border: 1px solid #ddd; padding: 8px;") | (1+time_over),
+                    [(h.td(style="background-color: d0d0f0;text-align:center;border: 1px solid #ddd; padding: 8px;") |
                       ('-' if value is None else value)) for value in result_details]
                 ))
-                # row.append(column)
-            # self.rows.append(row)
         for flavour, (table, stats) in self.accumulator.items():
             self.summarize(flavour, stats)
 
