@@ -14,7 +14,7 @@ dbg_print = (int(os.getenv('MINDER_DBG', 0)) and print) or (lambda *pp, **kw: No
 
 class BaseTest:
     exec_dir = ''  # default = find executables via path mechanism
-    exec_file = 'ping'  # stub for initial testing
+    exec_file = ''  # stub for initial testing
     showOut = True
     times_over = 1
     count = 4
@@ -22,8 +22,9 @@ class BaseTest:
 
     def get_title(self):
         return self._title or self.__class__.__name__
+
     def get_flavours(self):
-        return 'localhost', 'absenthost'
+        return None
 
     def get_args(self, flavour):
         return '-c', '4', flavour
@@ -73,8 +74,8 @@ class BaseTest:
         self.prepare()
         flavours = self.get_flavours()
         if not flavours:
-            print("'%s' is not implemented or maybe just not enabled for this platform"
-                  % self.__class__.__name__)
+            print("'%s' is not runnable on this platform"
+                  % self.get_title())
             return
         tables = OrderedDict()
         for time_over in range(self.times_over):
