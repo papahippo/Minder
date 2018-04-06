@@ -11,9 +11,6 @@ class PingTest(BaseTest):
     count = 4
     _title = None
 
-    def get_title(self):
-        return self._title or self.__class__.__name__
-
     def get_flavours(self):
         return 'localhost', 'absenthost'
 

@@ -32,5 +32,6 @@ def main(*classes):
         print(h.html | (head, body), file=html_file)
 
 if __name__ == "__main__":
+    from .target import Target
     main(BaseTest)
 

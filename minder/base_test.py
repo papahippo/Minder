@@ -6,8 +6,6 @@ Minder is a simple(ish) test and evaluation framework ..
 import sys, os, subprocess
 from collections import OrderedDict
 from phileas import _html40 as h
-# import phileas
-# print(phileas.__path__)
 
 dbg_print = (int(os.getenv('MINDER_DBG', 0)) and print) or (lambda *pp, **kw: None)
 
@@ -21,7 +19,7 @@ class BaseTest:
     _title = None
 
     def get_title(self):
-        return self._title or self.__class__.__name__
+        return (self._title or self.__class__.__name__) + " on %s" % self.target_name
 
     def get_flavours(self):
         return None
@@ -81,7 +79,6 @@ class BaseTest:
             self.accumulator[flavour] = (table, stats)
 
     def exercise(self):
-        self.prepare()
         flavours = self.get_flavours()
         if not flavours:
             print("'%s' is not runnable on this platform"

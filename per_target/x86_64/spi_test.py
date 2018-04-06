@@ -6,8 +6,10 @@ import target
 
 
 class SpiTest(minder.SpiTest, target.Target):
-    pass
+    def get_flavours(self):
+        return None  # no readily available SPI device on pc platform.
 
 
 if __name__ == "__main__":
-    minder.main(SpiTest)
+    test = SpiTest()
+    test.main()

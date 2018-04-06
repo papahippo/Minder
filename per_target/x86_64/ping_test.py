@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import minder
+import target
 
-
-class PingTest(minder.PingTest):
+class PingTest(minder.PingTest, target.Target):
     pass
 
 
