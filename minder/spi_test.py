@@ -8,15 +8,15 @@ class SpiTest(BaseTest):
     exec_file = 'spidev_test'
     showOut = True
     times_over = 2
-    bit_rates = (2500000, 300000, 5000000, 6000000, )
+    kbit_rates = (2500, 3000, 5000, 6000, )
     spiPort = '/dev/spidev1.0'
     iterations = 2000
-    packet_size = 42
+    packet_size = 256
 
     def get_flavours(self):
-        return self.bit_rates
+        return self.kbit_rates
 
     def get_args(self, flavour):
-        return ('-D', self.spiPort, '-s', flavour, '-I', self.iterations,
+        return ('-D', self.spiPort, '-s', flavour*1000, '-I', int((50000*self.packet_size)/flavour),
                 '-o', 'results.bin', '-p', '\x80\x80\x80\x80',
                 '-S', self.packet_size, '-B')
