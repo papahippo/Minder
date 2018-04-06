@@ -9,7 +9,7 @@ class SerialTest(BaseTest):
     showOut = True
     times_over = 2
     bit_rates = (115200, 250000, 500000, 1500000)
-    ttyPort = '/dev/ttyUSB1'
+    ttyPort = '/dev/ttyUSB0'
     tx_secs = 3  # 30
     rx_secs = 5  # 35
 
@@ -34,7 +34,3 @@ class SerialTest(BaseTest):
             print(result.groups())
         return "width:100%", (('received', 'transmitted', 'rx errors'),
                               result and result.groups() or [None]*3)
-
-if __name__ == "__main__":
-    test = SerialTest()
-    test.main()

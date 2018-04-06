@@ -107,21 +107,7 @@ class BaseTest:
         for flavour, (table, stats) in self.accumulator.items():
             self.summarize(flavour, stats)
 
-        print(h.p | (
+        return h.p | (
             h.h2 | self.get_title(), h.br,
             [(table, h.br*2) for table, stats in self.accumulator.values()]
-        ), file=self.html_out)
-
-    def main(self):
-        print("running %s" % sys.argv.pop(0))
-        if sys.argv:
-            self.run(*sys.argv)
-        else:
-            with open('test.html', 'w') as self.html_out:
-                self.exercise()
-
-
-if __name__ == "__main__":
-    test = BaseTest()
-    test.main()
-
+        )

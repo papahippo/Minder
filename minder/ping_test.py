@@ -32,6 +32,3 @@ class PingTest(BaseTest):
         return "width:100%", (('transmitted', 'received', '% packet loss', 'time'),
                               result and result.groups() or [None]*4)
         # to be finished to include stats from last line too!
-if __name__ == "__main__":
-    test = PingTest()
-    test.main()

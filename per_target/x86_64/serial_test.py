@@ -8,5 +8,4 @@ class SerialTest(minder.SerialTest):
 
 
 if __name__ == "__main__":
-    test = SerialTest()
-    test.main()
+    minder.main(SerialTest)

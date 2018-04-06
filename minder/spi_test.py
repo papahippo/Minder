@@ -20,8 +20,3 @@ class SpiTest(BaseTest):
         return ('-D', self.spiPort, '-s', flavour, '-I', self.iterations,
                 '-o', 'results.bin', '-p', '\x80\x80\x80\x80',
                 '-S', self.packet_size, '-B')
-
-
-if __name__ == "__main__":
-    test = SpiTest()
-    test.main()
