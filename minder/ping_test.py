@@ -18,7 +18,7 @@ class PingTest(BaseTest):
         return '-c', 10, flavour
 
     def arrange_args_for_table(self, flavour):
-        return 'width:40%', zip(('host', flavour), ('count', self.count))
+        return zip(('host', flavour), ('count', self.count))
 
     def inspect(self, flavour, rc, output, stats):
         result = re.search(r'(\d+) packets transmitted\D.(\d+)\sreceived\D+(\d+)\% packet loss,'

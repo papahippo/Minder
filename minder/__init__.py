@@ -5,17 +5,7 @@ from .base_test import BaseTest
 from .serial_test import SerialTest
 from .spi_test import SpiTest
 from .ping_test import PingTest
-
-
-def style():
-    return ("""
-th, td {
-    color: black;
-    font-family: verdana;
-    font-size: 12px;
-}
-
-    """)
+from .style import Style
 
 
 def main(*classes):
@@ -28,7 +18,7 @@ def main(*classes):
         for class_ in classes:
             inst = class_()
             body |= inst.exercise()
-        head = h.head | (h.style | style())
+        head = h.head | (h.style | Style())
         print(h.html | (head, body), file=html_file)
 
 if __name__ == "__main__":

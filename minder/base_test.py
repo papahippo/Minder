@@ -5,7 +5,7 @@ Minder is a simple(ish) test and evaluation framework ..
 """
 import sys, os, subprocess
 from collections import OrderedDict
-from phileas import _html40 as h
+from phileas import html40_ as h
 
 dbg_print = (int(os.getenv('MINDER_DBG', 0)) and print) or (lambda *pp, **kw: None)
 
@@ -28,8 +28,8 @@ class BaseTest:
         return '-c', '4', flavour
 
     def arrange_args_for_table(self, flavour):
-        return 'width:40%', zip(('host', flavour),
-                             ('count', self.count))
+        return zip(('host', flavour),
+                   ('count', self.count))
 
     def cmd(self, *pp):
         print(pp)
@@ -68,11 +68,11 @@ class BaseTest:
     def prepare(self):
         self.accumulator = OrderedDict()
         for flavour in self.get_flavours():
-            style, args_nice = self.arrange_args_for_table(flavour)
-            table = h.table(style=style)
+            args_nice = self.arrange_args_for_table(flavour)
+            table = h.table()
             headers, values = args_nice
-            table |= (h.tr() | [(h.th(style="background-color: f0c0c0;text-align:center;border: 1px solid #ddd; padding: 8px;") | header) for header in headers])
-            table |= (h.tr() | [(h.td(style="background-color: f0f0f0;text-align:center;border: 1px solid #ddd; padding: 8px;color:blue") | value) for value in values])
+            table |= (h.tr() | [(h.th(Class='input') | header) for header in headers])
+            table |= (h.tr() | [(h.td(Class='input') | value) for value in values])
             # print(table, file=self.html_out)
             # sys.exit(42)  # temporary!
             stats =list()
@@ -92,13 +92,13 @@ class BaseTest:
                 print("result headers, details: ", result_headers, result_details)
                 if time_over is 0:
                     table |= (h.tr() | (
-                        h.th(style="border: 1px solid #ddd; padding: 8px;background-color: a0a0f0;") | 'seqno.',
-                        [(h.th(style="border: 1px solid #ddd; padding: 8px;background-color: a0a0f0;") | header)
+                        h.th(Class='output') | 'seqno.',
+                        [(h.th(Class='output') | header)
                          for header in result_headers]
                     ))
                 table |= (h.tr | (
-                    h.th(style="background-color: f0f0f0;text-align:center;border: 1px solid #ddd; padding: 8px;") | (1+time_over),
-                    [(h.td(style="background-color: d0d0f0;text-align:center;border: 1px solid #ddd; padding: 8px;") |
+                    h.th(Class='output's) | (1+time_over),
+                    [(h.td(Class='output') |
                       ('-' if value is None else value)) for value in result_details]
                 ))
         for flavour, (table, stats) in self.accumulator.items():

@@ -21,11 +21,11 @@ class SerialTest(BaseTest):
                 '-b', flavour)
 
     def arrange_args_for_table(self, flavour):
-        return 'width:80%', zip(('ttyPort', self.ttyPort),
-                             ('bit ("baud") rate', flavour),
-                             ('transmit seconds', self.tx_secs),
-                             ('receive seconds', self.rx_secs),
-                             )
+        return zip(('ttyPort', self.ttyPort),
+                   ('bit ("baud") rate', flavour),
+                   ('transmit seconds', self.tx_secs),
+                   ('receive seconds', self.rx_secs),
+                   )
 
     def inspect(self, flavour, rc, output, stats):
         result = re.search(r'session\:\s*rx=(\d+)\D+tx=(\d+)\D+rx\s*err=(\d+)',
