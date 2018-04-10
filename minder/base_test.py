@@ -11,6 +11,7 @@ dbg_print = (int(os.getenv('MINDER_DBG', 0)) and print) or (lambda *pp, **kw: No
 
 
 class BaseTest:
+    pre_args = ('stdbuf', '-o0')
     exec_dir = ''  # default = find executables via path mechanism
     exec_file = ''  # stub for initial testing
     showOut = True
@@ -33,8 +34,10 @@ class BaseTest:
 
     def cmd(self, *pp):
         print(pp)
-        answer = (('stdbuf', '-o0', self.exec_dir + self.exec_file,)
-                  + tuple(map(str, pp)))
+        answer = map(str,
+                     self.pre_args +
+                     (self.exec_dir + self.exec_file,) +
+                     pp)
         dbg_print("External.cmd answer = ", answer)
         return answer
 
@@ -97,7 +100,7 @@ class BaseTest:
                          for header in result_headers]
                     ))
                 table |= (h.tr | (
-                    h.th(Class='output's) | (1+time_over),
+                    h.th(Class='output') | (1+time_over),
                     [(h.td(Class='output') |
                       ('-' if value is None else value)) for value in result_details]
                 ))
