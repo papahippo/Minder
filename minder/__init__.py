@@ -5,6 +5,7 @@ from .base_test import BaseTest
 from .serial_test import SerialTest
 from .spi_test import SpiTest
 from .ping_test import PingTest
+from .curaengine_test import CuraEngineTest
 from .style import Style
 
 
@@ -20,6 +21,7 @@ def main(*classes):
             body |= inst.exercise()
         head = h.head | (h.style | Style())
         print(h.html | (head, body), file=html_file)
+
 
 if __name__ == "__main__":
     from .target import Target

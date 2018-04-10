@@ -50,16 +50,26 @@ class BaseTest:
     def run(self, *args):
         cmd1 = self.cmd(*args)
         dbg_print(cmd1)
-        process = subprocess.Popen(cmd1, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        rc = process.wait()
-        output, error = (pipe.read().decode('utf8', errors='ignore')
-                         for pipe in (process.stdout, process.stdout))
+        if 0:  # this requires python 3.5 so is not yet appropriate!
+            process = subprocess.run(cmd1,
+                                              stdout=subprocess.PIPE,
+                                              stderr=subprocess.PIPE)
+            output, error = (stream.decode('utf8', errors='ignore')
+                             for stream in (process.stdout,
+                                            process.stderr))
+        else:  # this is also ok under python 3.4!
+            process = subprocess.Popen(cmd1,
+                                              stdout=subprocess.PIPE,
+                                              stderr=subprocess.PIPE)
+            output, error = (stream.decode('utf8', errors='ignore')
+                             for stream in process.communicate())
+
 
         print(*["%s=<<%s>>\n" % (name, data) for name, data in
               (('stdout', output),
                ('stderr', error))])
         output, error = self.fixup(output, error)
-        return rc, output
+        return process.returncode, output
 
     def inspect(self, flavour, rc, output, stats):
         print("sorry, I - %s - don't (yet) do analysis!" % self)
@@ -76,9 +86,7 @@ class BaseTest:
             headers, values = args_nice
             table |= (h.tr() | [(h.th(Class='input') | header) for header in headers])
             table |= (h.tr() | [(h.td(Class='input') | value) for value in values])
-            # print(table, file=self.html_out)
-            # sys.exit(42)  # temporary!
-            stats =list()
+            stats = list() # stub!
             self.accumulator[flavour] = (table, stats)
 
     def exercise(self):
