@@ -29,8 +29,8 @@ class BaseTest:
         return '-c', '4', flavour
 
     def arrange_args_for_table(self, flavour):
-        return zip(('host', flavour),
-                   ('count', self.count))
+        return (('host', flavour),
+                ('count', self.count))
 
     def cmd(self, *pp):
         print(pp)
@@ -50,7 +50,7 @@ class BaseTest:
     def run(self, *args):
         cmd1 = self.cmd(*args)
         dbg_print(cmd1)
-        if 0:  # this requires python 3.5 so is not yet appropriate!
+        if 0:  # this requires python 3.5 so is not (yet?) appropriate!
             process = subprocess.run(cmd1,
                                               stdout=subprocess.PIPE,
                                               stderr=subprocess.PIPE)
@@ -60,15 +60,14 @@ class BaseTest:
         else:  # this is also ok under python 3.4!
             process = subprocess.Popen(cmd1,
                                               stdout=subprocess.PIPE,
-                                              stderr=subprocess.PIPE)
-            output, error = (stream.decode('utf8', errors='ignore')
-                             for stream in process.communicate())
-
-
-        print(*["%s=<<%s>>\n" % (name, data) for name, data in
-              (('stdout', output),
-               ('stderr', error))])
-        output, error = self.fixup(output, error)
+                                              stderr=subprocess.STDOUT)
+            output = ''
+            for line_bytes in process.stdout:
+                line_str = line_bytes.decode('utf8', errors='ignore')
+                print(line_str, end='')
+                output += line_str
+        # kind of broken 'for now'  ...
+        # output, error = self.fixup(output, error)
         return process.returncode, output
 
     def inspect(self, flavour, rc, output, stats):
@@ -76,17 +75,16 @@ class BaseTest:
         return None
 
     def summarize(self, flavour, stats):
-        return False
+        return ("None",), ("-",)
 
     def prepare(self):
         self.accumulator = OrderedDict()
         for flavour in self.get_flavours():
-            args_nice = self.arrange_args_for_table(flavour)
             table = h.table()
-            headers, values = args_nice
+            headers, values = zip(*self.arrange_args_for_table(flavour))
             table |= (h.tr() | [(h.th(Class='input') | header) for header in headers])
             table |= (h.tr() | [(h.td(Class='input') | value) for value in values])
-            stats = list() # stub!
+            stats = list()
             self.accumulator[flavour] = (table, stats)
 
     def exercise(self):
@@ -99,8 +97,10 @@ class BaseTest:
         for time_over in range(self.times_over):
             for flavour, (table, stats) in self.accumulator.items():
                 rc, output = self.run(*self.get_args(flavour))
-                style, (result_headers, result_details) = self.inspect(flavour, rc, output, stats)
+                numbers, results_for_table = self.inspect(flavour, rc, output, stats)
+                result_headers, result_details = zip(*results_for_table)
                 print("result headers, details: ", result_headers, result_details)
+                stats.append(numbers)
                 if time_over is 0:
                     table |= (h.tr() | (
                         h.th(Class='output') | 'seqno.',
@@ -113,7 +113,8 @@ class BaseTest:
                       ('-' if value is None else value)) for value in result_details]
                 ))
         for flavour, (table, stats) in self.accumulator.items():
-            self.summarize(flavour, stats)
+            headers, values = self.summarize(flavour, stats)
+
 
         return h.p | (
             h.h2 | self.get_title(), h.br,

@@ -18,7 +18,10 @@ class PingTest(BaseTest):
         return '-c', 10, flavour
 
     def arrange_args_for_table(self, flavour):
-        return zip(('host', flavour), ('count', self.count))
+        return (
+            ('host', flavour),
+            ('count', self.count)
+        )
 
     def inspect(self, flavour, rc, output, stats):
         result = re.search(r'(\d+) packets transmitted\D.(\d+)\sreceived\D+(\d+)\% packet loss,'
@@ -26,6 +29,6 @@ class PingTest(BaseTest):
                            output)
         if result is not None:
             print(result.groups())
-        return "width:100%", (('transmitted', 'received', '% packet loss', 'time'),
+        return (42,),  (('transmitted', 'received', '% packet loss', 'time'),
                               result and result.groups() or [None]*4)
         # to be finished to include stats from last line too!

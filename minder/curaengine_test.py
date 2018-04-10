@@ -8,13 +8,13 @@ class CuraEngineTest(BaseTest):
     exec_file = 'CuraEngine'
     pre_args = ('nice', '-n-15')
     showOut = True
-    times_over = 2
+    times_over = 3
     model_dir = 'test_models'
     model_files = ('testModel.stl',
-                 'TriangleForest.stl',
-                 'robot_v2_support.stl',
-                 'BigKnot.stl',
-                 'Dragon.stl,'
+#                 'robot_v2_support.stl',
+#                 'Dragon.stl,'
+#                 'BigKnot.stl',
+#                 'TriangleForest.stl',
                  )
 
     def prepare(self):
@@ -37,12 +37,18 @@ class CuraEngineTest(BaseTest):
                 )
 
     def arrange_args_for_table(self, flavour):
-        return zip(('Model', flavour),)
+        return ('Model', flavour),
 
     def inspect(self, flavour, rc, output, stats):
-        result = re.search(r'\dTotal time elapsed\s+([-+]?[\d]*\.?[\d]+)',
+        result = re.search(r'\nTotal time elapsed\s+([-+]?[\d]*\.?[\d]+)',
                            output)
-        time_elapsed, = result and result.groups() or None,
-        return "width:100%", (('time elapsed',),
+        time_elapsed = result and eval(result.groups()[0]) or None
+
+        # simplistic for now...
+        return time_elapsed, (('time elapsed',),
                               (time_elapsed,)
                               )
+    def summarize(self, flavour, stats):
+        avg_elapsed_time = sum(stats) / len(stats)
+        print ("=============", avg_elapsed_time)
+        return zip(('avg. elapsed time', "%.2f" % avg_elapsed_time),)

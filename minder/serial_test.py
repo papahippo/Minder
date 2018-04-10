@@ -8,7 +8,7 @@ class SerialTest(BaseTest):
     exec_file = 'linux-serial-test'
     showOut = True
     times_over = 2
-    bit_rates = (115200, 250000, 500000, 1500000)
+    bit_rates = (115200, 250000) # , 500000, 1500000)
     ttyPort = '/dev/ttyUSB0'
     tx_secs = 3  # 30
     rx_secs = 5  # 35
@@ -21,16 +21,25 @@ class SerialTest(BaseTest):
                 '-b', flavour)
 
     def arrange_args_for_table(self, flavour):
-        return zip(('ttyPort', self.ttyPort),
-                   ('bit ("baud") rate', flavour),
-                   ('transmit seconds', self.tx_secs),
-                   ('receive seconds', self.rx_secs),
-                   )
+        return (
+            ('ttyPort', self.ttyPort),
+            ('bit ("baud") rate', flavour),
+            ('transmit seconds', self.tx_secs),
+            ('receive seconds', self.rx_secs),
+        )
 
     def inspect(self, flavour, rc, output, stats):
         result = re.search(r'session\:\s*rx=(\d+)\D+tx=(\d+)\D+rx\s*err=(\d+)',
                            output)
-        if result is not None:
-            print(result.groups())
-        return "width:100%", (('received', 'transmitted', 'rx errors'),
-                              result and result.groups() or [None]*3)
+        received, transmitted, rx_errors = result and result.groups() or [None]*3
+
+        return (42,), (('received', received),
+                       ('transmitted', transmitted),
+                       ('rx errors', rx_errors),
+                       )
+
+    def summarize(self, flavour, stats):
+        print(flavour, stats)
+        dummy_avg = sum([stat[0] for stat in stats]) / len(stats)
+        print ("=============", dummy_avg)
+        return (('dummy_avg',), dummy_avg,) # not yet tabulated!

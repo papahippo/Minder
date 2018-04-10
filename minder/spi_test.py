@@ -24,17 +24,18 @@ class SpiTest(BaseTest):
                 '-S', self.packet_size, '-B')
 
     def arrange_args_for_table(self, flavour):
-        return zip(('SPI port', self.spiPort),
-                   ('Kbits/second', flavour),
-                   ('packet size', self.packet_size),
-                   ('iterations', self.iterations_dict[flavour]),
-                   )
+        return (
+            ('SPI port', self.spiPort),
+            ('Kbits/second', flavour),
+            ('packet size', self.packet_size),
+            ('iterations', self.iterations_dict[flavour]),
+        )
 
     def inspect(self, flavour, rc, output, stats):
         result = re.search(r'max speed\:\s+(\d+)\sHz.*\n' +
                            r'.*rate\:\s*tx\s*(.+)kbps\,\s+rx\s*(.+)kbps',
                            output)
         max_speed, tx_kbps, rx_kbps = result and result.groups() or [None]*3
-        return "width:100%", (('rx kbps', 'tx kbps', 'max speed Hz'),
+        return (42,), (('rx kbps', 'tx kbps', 'max speed Hz'),
                               (rx_kbps, tx_kbps, max_speed)
                               )
