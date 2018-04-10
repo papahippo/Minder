@@ -36,6 +36,7 @@ class SpiTest(BaseTest):
                            r'.*rate\:\s*tx\s*(.+)kbps\,\s+rx\s*(.+)kbps',
                            output)
         max_speed, tx_kbps, rx_kbps = result and result.groups() or [None]*3
-        return (42,), (('rx kbps', 'tx kbps', 'max speed Hz'),
-                              (rx_kbps, tx_kbps, max_speed)
-                              )
+        return (42,), (('rx kbps', rx_kbps),
+                       ('tx kbps', tx_kbps),
+                       ('max speed Hz', max_speed),
+                       )

@@ -8,7 +8,7 @@ class SerialTest(BaseTest):
     exec_file = 'linux-serial-test'
     showOut = True
     times_over = 2
-    bit_rates = (115200, 250000) # , 500000, 1500000)
+    bit_rates = (115200, 250000, 500000, 1500000)
     ttyPort = '/dev/ttyUSB0'
     tx_secs = 3  # 30
     rx_secs = 5  # 35
@@ -42,4 +42,5 @@ class SerialTest(BaseTest):
         print(flavour, stats)
         dummy_avg = sum([stat[0] for stat in stats]) / len(stats)
         print ("=============", dummy_avg)
-        return (('dummy_avg',), dummy_avg,) # not yet tabulated!
+        return (('dummy_avg', dummy_avg),
+                )

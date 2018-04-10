@@ -27,8 +27,12 @@ class PingTest(BaseTest):
         result = re.search(r'(\d+) packets transmitted\D.(\d+)\sreceived\D+(\d+)\% packet loss,'
                            r'.*time\s+(\d+\S+)', # .*=\s+',
                            output)
-        if result is not None:
-            print(result.groups())
-        return (42,),  (('transmitted', 'received', '% packet loss', 'time'),
-                              result and result.groups() or [None]*4)
+        transmitted, received, packet_loss, timing = (
+                result and result.groups() or [None] * 4
+        )
+        return (42,),  (('transmitted', transmitted),
+                        ('received', received),
+                        ('%% packet loss', packet_loss),
+                        ('time', timing),
+        )
         # to be finished to include stats from last line too!

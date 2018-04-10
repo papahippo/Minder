@@ -50,22 +50,14 @@ class BaseTest:
     def run(self, *args):
         cmd1 = self.cmd(*args)
         dbg_print(cmd1)
-        if 0:  # this requires python 3.5 so is not (yet?) appropriate!
-            process = subprocess.run(cmd1,
-                                              stdout=subprocess.PIPE,
-                                              stderr=subprocess.PIPE)
-            output, error = (stream.decode('utf8', errors='ignore')
-                             for stream in (process.stdout,
-                                            process.stderr))
-        else:  # this is also ok under python 3.4!
-            process = subprocess.Popen(cmd1,
-                                              stdout=subprocess.PIPE,
-                                              stderr=subprocess.STDOUT)
-            output = ''
-            for line_bytes in process.stdout:
-                line_str = line_bytes.decode('utf8', errors='ignore')
-                print(line_str, end='')
-                output += line_str
+        process = subprocess.Popen(cmd1,
+                                          stdout=subprocess.PIPE,
+                                          stderr=subprocess.STDOUT)
+        output = ''
+        for line_bytes in process.stdout:
+            line_str = line_bytes.decode('utf8', errors='ignore')
+            print(line_str, end='')
+            output += line_str
         # kind of broken 'for now'  ...
         # output, error = self.fixup(output, error)
         return process.returncode, output
@@ -113,8 +105,17 @@ class BaseTest:
                       ('-' if value is None else value)) for value in result_details]
                 ))
         for flavour, (table, stats) in self.accumulator.items():
-            headers, values = self.summarize(flavour, stats)
-
+            headers, values = zip(*self.summarize(flavour, stats))
+            table |= (h.tr | (
+                h.th(Class='output') | 'summary',
+                [(h.th(Class='output') | header)
+                 for header in headers]
+            ))
+            table |= (h.tr | (
+                h.th(Class='output') | '-',
+                [(h.td(Class='output') |
+                  ('-' if value is None else value)) for value in values]
+            ))
 
         return h.p | (
             h.h2 | self.get_title(), h.br,

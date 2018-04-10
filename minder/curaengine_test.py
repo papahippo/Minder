@@ -45,10 +45,9 @@ class CuraEngineTest(BaseTest):
         time_elapsed = result and eval(result.groups()[0]) or None
 
         # simplistic for now...
-        return time_elapsed, (('time elapsed',),
-                              (time_elapsed,)
-                              )
+        return time_elapsed, (('time elapsed', time_elapsed),)
+
     def summarize(self, flavour, stats):
         avg_elapsed_time = sum(stats) / len(stats)
         print ("=============", avg_elapsed_time)
-        return zip(('avg. elapsed time', "%.2f" % avg_elapsed_time),)
+        return ('avg. elapsed time', "%.2f" % avg_elapsed_time),
