@@ -1,2 +1,2 @@
 class Target:
-    target_name = "olimex running (partial?) Ultimaker software"
+    target_name = "olimex running Ultimaker software"

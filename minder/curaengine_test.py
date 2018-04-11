@@ -11,11 +11,11 @@ class CuraEngineTest(BaseTest):
     times_over = 3
     model_dir = 'test_models'
     model_files = ('testModel.stl',
-#                 'robot_v2_support.stl',
-#                 'Dragon.stl,'
-#                 'BigKnot.stl',
-#                 'TriangleForest.stl',
-                 )
+                   'robot_v2_support.stl',
+                   'Dragon.stl',
+                   'BigKnot.stl',
+                   'TriangleForest.stl',
+                   )
 
     def prepare(self):
         BaseTest.prepare(self)
