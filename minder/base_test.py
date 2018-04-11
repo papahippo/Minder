@@ -3,7 +3,7 @@
 """
 Minder is a simple(ish) test and evaluation framework ..
 """
-import sys, os, subprocess
+import sys, os, subprocess, tempfile
 from collections import OrderedDict
 from phileas import html40_ as h
 
@@ -11,29 +11,67 @@ dbg_print = (int(os.getenv('MINDER_DBG', 0)) and print) or (lambda *pp, **kw: No
 
 
 class BaseTest:
-    pre_args = ('stdbuf', '-o0')
+    """
+'BaseTest' is the primary class of the 'Minder' (timing) test script.
+A number of other test classes inherit from it.
+    """
+    pre_args = ('stdbuf', '-o0')  # stuff these in front of command.
     exec_dir = ''  # default = find executables via path mechanism
     exec_file = ''  # stub for initial testing
-    showOut = True
     times_over = 1
     count = 4
     _title = None
+
+    def __init__(self):
+        self.temp_dir = tempfile.mkdtemp(prefix=self.__class__.__name__+'_')
+        self.ongoing_html_file = open(self.temp_dir+'/'+"ongoing.html", 'w')
+        self.accumulator = OrderedDict()
+        self.prepare()
+
+    def prepare(self):
+        for flavour in self.get_flavours():
+            table = h.table()
+            headers, values = zip(*self.arrange_args_for_table(flavour))
+            table |= (h.tr() | [(h.th(Class='input') | header) for header in headers])
+            table |= (h.tr() | [(h.td(Class='input') | value) for value in values])
+            stats = list()
+            self.accumulator[flavour] = (table, stats)
 
     def get_title(self):
         return (self._title or self.__class__.__name__) + " on %s" % self.target_name
 
     def get_flavours(self):
+        """
+Several distinct combination of arguments are passed to each test program. One of
+these arguments (e.g. the baud rate in the case of SerialTest is used as a key in our
+test administration. The various values of this key ar referred to as 'flavours'.
+'get_flavours' returns the appropriate flavours for a particular test class.
+Exceptionally (e.g in this base class), if the test is not possible for the current
+platform, a simlpe 'None' is returned.
+        """
         return None
 
     def get_args(self, flavour):
+        """
+Function 'get_args' returns the complete collection of arguments associated with a
+particular flavour, as a (sometimes quite long) tuple.
+        """
         return '-c', '4', flavour
 
     def arrange_args_for_table(self, flavour):
+        """
+Function 'arrange_args_for_table' returns essential information about a particular flavour,
+as tuple of pairs (tuples of length 2).
+        """
         return (('host', flavour),
                 ('count', self.count))
 
     def cmd(self, *pp):
-        print(pp)
+        """
+'cmd' expands the supplied command arguments to include any 'up front' arguments
+(e.g. 'stdbuf', '-o0' ... or  'nice' ... ...) and the name of the program to be run.
+Arguments are 'stringified' here so once may pass e.g. counts as integers.
+        """
         answer = map(str,
                      self.pre_args +
                      (self.exec_dir + self.exec_file,) +
@@ -42,20 +80,31 @@ class BaseTest:
         return answer
 
     def fixup(self, output, error):
+        """
+Function fixup is intended to 'juggle' output between stdout and stderr, in order to
+conform to the notion that stdout should be held back and analysed in due course,
+whereas stderr should be shown as is immediately. Owing to problems with buffer deadlock,
+this mechanism has bene ditched 'for now'.
+        """
         return output, error
 
-    def process_output(self, rc, output):  # obsolescent?
-        pass  # stub
-
     def run(self, *args):
+        """
+Function 'run' runs the test program (e.g. ping, serial_test, spi_dev_test).
+The combined stderr/stdout output is returned together with the return code.
+        """
         cmd1 = self.cmd(*args)
         dbg_print(cmd1)
         process = subprocess.Popen(cmd1,
-                                          stdout=subprocess.PIPE,
-                                          stderr=subprocess.STDOUT)
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT)
         output = ''
         for line_bytes in process.stdout:
             line_str = line_bytes.decode('utf8', errors='ignore')
+
+            # display the output immediately. This is handy when getting the
+            # test up and running but should maybe be subject to a command line argument.
+            #
             print(line_str, end='')
             output += line_str
         # kind of broken 'for now'  ...
@@ -69,23 +118,11 @@ class BaseTest:
     def summarize(self, flavour, stats):
         return ("None",), ("-",)
 
-    def prepare(self):
-        self.accumulator = OrderedDict()
-        for flavour in self.get_flavours():
-            table = h.table()
-            headers, values = zip(*self.arrange_args_for_table(flavour))
-            table |= (h.tr() | [(h.th(Class='input') | header) for header in headers])
-            table |= (h.tr() | [(h.td(Class='input') | value) for value in values])
-            stats = list()
-            self.accumulator[flavour] = (table, stats)
-
     def exercise(self):
-        flavours = self.get_flavours()
-        if not flavours:
+        if not self.get_flavours():
             print("'%s' is not runnable on this platform"
                   % self.get_title())
-            return
-        self.prepare()
+            return ''  # barely adequate?
         for time_over in range(self.times_over):
             for flavour, (table, stats) in self.accumulator.items():
                 rc, output = self.run(*self.get_args(flavour))
@@ -102,10 +139,13 @@ class BaseTest:
                 table |= (h.tr | (
                     h.th(Class='output') | (1+time_over),
                     [(h.td(Class='output') |
-                      ('-' if value is None else value)) for value in result_details]
+                      ('-' if value is None else str(value))) for value in result_details]
                 ))
+                self.stash_my_html('test in progress...')
         for flavour, (table, stats) in self.accumulator.items():
-            headers, values = zip(*self.summarize(flavour, stats))
+            ez_stats = [[stat_item for stat_item in stat_cat if stat_item is not None]
+                        for stat_cat in zip(*stats)]
+            headers, values = zip(*self.summarize(flavour, ez_stats))
             table |= (h.tr | (
                 h.th(Class='output') | 'summary',
                 [(h.th(Class='output') | header)
@@ -116,8 +156,17 @@ class BaseTest:
                 [(h.td(Class='output') |
                   ('-' if value is None else value)) for value in values]
             ))
+        return self.stash_my_html('test completed!')
 
-        return h.p | (
-            h.h2 | self.get_title(), h.br,
-            [(table, h.br*2) for table, stats in self.accumulator.values()]
+    def stash_my_html(self, status_string):
+        my_html = (
+            h.p | (
+                h.h3 | self.get_title(), h.br,
+                h.h4 | status_string, h.br,
+                [(table, h.br*2) for table, stats in self.accumulator.values()]
+            )
         )
+        self.ongoing_html_file.seek(0, 0)
+        print(my_html, file=self.ongoing_html_file)
+        self.ongoing_html_file.flush()
+        return my_html

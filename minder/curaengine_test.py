@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 from .base_test import BaseTest
 import re, os
-import tempfile
+
+
 class CuraEngineTest(BaseTest):
     exec_dir = 'bin/'  # under review
     exec_file = 'CuraEngine'
@@ -16,10 +17,6 @@ class CuraEngineTest(BaseTest):
                    'BigKnot.stl',
                    'TriangleForest.stl',
                    )
-
-    def prepare(self):
-        BaseTest.prepare(self)
-        self.temp_dir = tempfile.mkdtemp(prefix='curaengine_test_')
 
     def get_flavours(self):
         return self.model_files
