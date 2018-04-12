@@ -14,6 +14,9 @@ class SpiTest(BaseTest):
     packet_size = 256
 
     def get_flavours(self):
+        """
+This is little more complicated
+        """
         for flavour in self.kbit_rates:
             self.iterations_dict[flavour] = int((30000*self.packet_size)/flavour)
         return self.kbit_rates
