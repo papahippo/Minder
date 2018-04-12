@@ -22,13 +22,22 @@ A number of other test classes inherit from it.
     count = 4
     _title = None
 
-    def __init__(self):
+    def __init__(self, reticent=0, verbose=0):
+        """
+        :param reticent: non-zero => hold back output until progam until test completed.
+        :param verbose:  larger values => more progress info. (not yet fully implemented)
+        """
+        self.reticent = reticent
+        self.verbose = verbose
         self.temp_dir = tempfile.mkdtemp(prefix=self.__class__.__name__+'_')
         self.ongoing_html_file = open(self.temp_dir+'/'+"ongoing.html", 'w')
         self.accumulator = OrderedDict()
         self.prepare()
 
     def prepare(self):
+        """
+'prepare' is really just '__init__ continued!
+        """
         for flavour in self.get_flavours():
             table = h.table()
             headers, values = zip(*self.arrange_args_for_table(flavour))
@@ -47,9 +56,9 @@ these arguments (e.g. the baud rate in the case of SerialTest is used as a key i
 test administration. The various values of this key ar referred to as 'flavours'.
 'get_flavours' returns the appropriate flavours for a particular test class.
 Exceptionally (e.g in this base class), if the test is not possible for the current
-platform, a simlpe 'None' is returned.
+platform, an empty sequence is returned.
         """
-        return None
+        return ()
 
     def get_args(self, flavour):
         """
@@ -84,7 +93,7 @@ Arguments are 'stringified' here so once may pass e.g. counts as integers.
 Function fixup is intended to 'juggle' output between stdout and stderr, in order to
 conform to the notion that stdout should be held back and analysed in due course,
 whereas stderr should be shown as is immediately. Owing to problems with buffer deadlock,
-this mechanism has bene ditched 'for now'.
+this mechanism has been ditched 'for now'.
         """
         return output, error
 
@@ -95,6 +104,8 @@ The combined stderr/stdout output is returned together with the return code.
         """
         cmd1 = self.cmd(*args)
         dbg_print(cmd1)
+        # pycharm doesn't like the statement below but python seems to be ok with it!
+        #
         process = subprocess.Popen(cmd1,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
@@ -112,13 +123,38 @@ The combined stderr/stdout output is returned together with the return code.
         return process.returncode, output
 
     def inspect(self, flavour, rc, output, stats):
+        """
+'inspect' receives the output (stdout and stderr combined) of a run of the test program
+(and the return code which it currently ignores!).
+It is expected to return a tuple: <numeric data>, <table data>.
+The returned <numeric data> must be a tuple. This will simply be appended to other data
+relating to this flavour of this test. (All this data gets supplied to 'summarize' later.
+The returned <table data> represents a sequence of pairs (tuples of length 2)
+each containing a header text and a data value (not per se a string) to be displayed
+in an HTML table.
+        """
         print("sorry, I - %s - don't (yet) do analysis!" % self)
-        return None
+        return (), ()  # no stats, no hdr-data pairs!
 
-    def summarize(self, flavour, stats):
-        return ("None",), ("-",)
+    def summarize(self, flavour, ez_stats):
+        """
+Function 'summarize' is called when for each 'flavour' all (self.times_over) iterations
+have been completed. It is supplied with the statistics that our 'inspect' function  returned on
+all iterations. These have been 'zipped' in the python sense ('rows' and 'columns' reversed), and
+Entries with the value 'None' have been removed.
+It is expected to return a sequence of pairs (tuples of length 2)
+each containing a header text and a data value (not per se a string) to be displayed
+in the 'summary' row of an HTML table.
+        """
+        return ()  # no pairs => no summary information
 
     def exercise(self):
+        """
+Function exercise is really the principle entry point of the class and is called directly
+from the top-level main function (see '__init__.py').
+It performs a number of iterations of each flavour of this class's test program and manages
+the resulting statistics.
+        """
         if not self.get_flavours():
             print("'%s' is not runnable on this platform"
                   % self.get_title())
@@ -139,7 +175,7 @@ The combined stderr/stdout output is returned together with the return code.
                 table |= (h.tr | (
                     h.th(Class='output') | (1+time_over),
                     [(h.td(Class='output') |
-                      ('-' if value is None else str(value))) for value in result_details]
+                      ('-' if value is None else value)) for value in result_details]
                 ))
                 self.stash_my_html('test in progress...')
         for flavour, (table, stats) in self.accumulator.items():
@@ -159,6 +195,15 @@ The combined stderr/stdout output is returned together with the return code.
         return self.stash_my_html('test completed!')
 
     def stash_my_html(self, status_string):
+        """
+Function  'stash_my_html' is called after each inner iteration. it writes the 'story so far'
+as an HTML table to a temporary file (whose name includes our class name). It is also called
+once after writing teh summary information.
+
+It returns the same html to its caller. This is ignored except on the final call, when it
+is returned (to 'main' in "__main__.py") for inclusion in an html report including this
+and possibly other tests.
+        """
         my_html = (
             h.p | (
                 h.h3 | self.get_title(), h.br,
