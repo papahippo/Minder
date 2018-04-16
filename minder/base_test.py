@@ -5,7 +5,7 @@ Minder is a simple(ish) test and evaluation framework ..
 """
 import sys, os, subprocess, tempfile
 from collections import OrderedDict
-from phileas import html40_ as h
+from phileas import html4 as h
 
 dbg_print = (int(os.getenv('MINDER_DBG', 0)) and print) or (lambda *pp, **kw: None)
 
