@@ -3,9 +3,10 @@
 import minder
 import target
 
-class PingTest(minder.PingTest, target.Target):
+
+class EthernetTest(minder.EthernetTest, target.Target):
     pass
 
 
 if __name__ == "__main__":
-    minder.main(PingTest)
+    minder.main(EthernetTest)

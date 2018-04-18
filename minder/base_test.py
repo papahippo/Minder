@@ -3,7 +3,7 @@
 """
 Minder is a simple(ish) test and evaluation framework ..
 """
-import sys, os, subprocess, tempfile
+import sys, os, subprocess, tempfile, datetime
 from collections import OrderedDict
 from phileas import html4 as h
 
@@ -14,6 +14,8 @@ class BaseTest:
     """
 'BaseTest' is the primary class of the 'Minder' (timing) test script.
 A number of other test classes inherit from it.
+For the sake of example, BaseTest also works as a 'ping test'. N.B. This is not
+as such part of our performance tests. (see EthernetTest in 'ethernet_test.py').
     """
     pre_args = ('stdbuf', '-o0')  # stuff these in front of command.
     exec_dir = ''  # default = find executables via path mechanism
@@ -81,11 +83,11 @@ as tuple of pairs (tuples of length 2).
 (e.g. 'stdbuf', '-o0' ... or  'nice' ... ...) and the name of the program to be run.
 Arguments are 'stringified' here so once may pass e.g. counts as integers.
         """
-        answer = map(str,
+        answer = list(map(str,
                      self.pre_args +
                      (self.exec_dir + self.exec_file,) +
-                     pp)
-        dbg_print("External.cmd answer = ", answer)
+                     pp))
+        print("External.cmd answer = ", answer)
         return answer
 
     def fixup(self, output, error):
@@ -133,8 +135,20 @@ The returned <table data> represents a sequence of pairs (tuples of length 2)
 each containing a header text and a data value (not per se a string) to be displayed
 in an HTML table.
         """
-        print("sorry, I - %s - don't (yet) do analysis!" % self)
-        return (), ()  # no stats, no hdr-data pairs!
+        result = re.search(r'(\d+) packets transmitted\D.(\d+)\sreceived\D+(\d+)\% packet loss,'
+                           r'.*time\s+(\d+\S+)',  # .*=\s+',
+                           output)
+        transmitted, received, packet_loss, timing = (
+                result and result.groups() or [None] * 4
+        )
+        return (  # must return a couple (tuple of two items).
+            (transmitted, received),  # first item contains statistics for accumulation ...
+            (('transmitted', transmitted),  # seconds item contains data for inclusion
+             ('received', received),  # 'as is' in table.
+             ('%% packet loss', packet_loss),
+             ('time', timing),
+             )
+        )
 
     def summarize(self, flavour, ez_stats):
         """
@@ -146,7 +160,11 @@ It is expected to return a sequence of pairs (tuples of length 2)
 each containing a header text and a data value (not per se a string) to be displayed
 in the 'summary' row of an HTML table.
         """
-        return ()  # no pairs => no summary information
+        tx_rates, = ez_stats
+        avg_tx_rate = tx_rates and '%.2f' % (sum(tx_rates) / len(tx_rates)) or None
+        return (('avg tx rate', avg_tx_rate),
+                )
+
 
     def exercise(self):
         """
@@ -159,12 +177,16 @@ the resulting statistics.
             print("'%s' is not runnable on this platform"
                   % self.get_title())
             return ''  # barely adequate?
+        self.start_time = datetime.datetime.now()
         for time_over in range(self.times_over):
+# introduced the following statement late in the day so that 'single flavour' tests
+# like e.g. iperf3 can be handled more simply.
+            self.time_over = time_over
             for flavour, (table, stats) in self.accumulator.items():
                 rc, output = self.run(*self.get_args(flavour))
                 numbers, results_for_table = self.inspect(flavour, rc, output, stats)
                 result_headers, result_details = zip(*results_for_table)
-                print("result headers, details: ", result_headers, result_details)
+                dbg_print("result headers, details: ", result_headers, result_details)
                 stats.append(numbers)
                 if time_over is 0:
                     table |= (h.tr() | (
@@ -207,7 +229,9 @@ and possibly other tests.
         my_html = (
             h.p | (
                 h.h3 | self.get_title(), h.br,
-                h.h4 | status_string, h.br,
+                h.h4 | ("%s: test started." % self.start_time, h.br,
+                        "%s %s" % (datetime.datetime.now(),  status_string), h.br,
+                        ),
                 [(table, h.br*2) for table, stats in self.accumulator.values()]
             )
         )

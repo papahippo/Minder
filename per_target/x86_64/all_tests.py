@@ -4,9 +4,9 @@
 import minder
 from serial_test import SerialTest
 from spi_test import SpiTest
-from ping_test import PingTest
+from ehternet_test import EthernetTest
 
 
 if __name__ == "__main__":
-    minder.main(SerialTest, SpiTest, PingTest)
+    minder.main(SerialTest, SpiTest, EthernetTest)
 

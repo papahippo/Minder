@@ -74,6 +74,11 @@ class SerialTest(BaseTest):
                             )
 
     def summarize(self, flavour, ez_stats):
+        """
+'summarize receives in ez_stats a list of accumulated values for each of the stats which
+were returned by successive calls to 'inspect'. All unknown values (we indicated these by
+returning None have been removed.
+        """
         tx_rates,  = ez_stats
         avg_tx_rate = tx_rates and '%.2f' % (sum(tx_rates) / len(tx_rates)) or None
         return (('avg tx rate', avg_tx_rate),
