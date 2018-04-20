@@ -16,10 +16,11 @@ by __init__.py, such test scripts can access it simply by:
 
     exec_name = sys.argv.pop(0)
     print("running %s" % exec_name)
-    reticent, verbose = [sum([(a in alternatives) for a in sys.argv])
+    calibrate, reticent, verbose = [sum([(a in alternatives) for a in sys.argv])
                          for alternatives in
-                            (('-R', '--reticent'),
-                             ('-V', '--verbose')
+                            (('-C', '--calibrate'),
+                             ('-R', '--reticent'),
+                             ('-V', '--verbose'),
                              )]
 
     html_filename = (sys.argv and sys.argv[0] or
@@ -27,7 +28,7 @@ by __init__.py, such test scripts can access it simply by:
     with open(html_filename, 'w') as html_file:
         body = h.body | (h.p | "running %s" % exec_name)
         for class_ in classes:
-            inst = class_(reticent=reticent, verbose=verbose)
+            inst = class_(calibrate=calibrate, reticent=reticent, verbose=verbose)
             body |= inst.exercise()
         head = h.head | (h.style | Style())
         print(h.html | (head, body), file=html_file)

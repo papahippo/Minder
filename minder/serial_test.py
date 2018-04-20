@@ -12,12 +12,14 @@ class SerialTest(BaseTest):
     #  https://github.com/cbrake/linux-serial-test.git
     exec_file = 'linux-serial-test'
     showOut = True  # obsolete?
-    times_over = 5
+    times_over = 2
     bit_rates = (115200, 250000, 500000, 1500000)
     # default ttyPort sometimes ok on PC, but invariably overruled on SOM target.
     ttyPort = '/dev/ttyUSB0'
     tx_secs = 30
     rx_secs = 35
+    calibrate = 1
+    pattern_byte = 0x55
 
     def prepare(self):
         BaseTest.prepare(self)
@@ -27,8 +29,12 @@ class SerialTest(BaseTest):
         return self.bit_rates
 
     def get_args(self, flavour):
-        return ('-p', self.ttyPort, '-o', self.tx_secs, '-i', self.rx_secs,
-                '-b', flavour)
+        if self.time_over < 0:  # calibrate
+            return ('-p', self.ttyPort, '-y', self.pattern_byte, '-z', 0x00,
+                    '-b', flavour)
+        else:  # measuring
+            return ('-p', self.ttyPort, '-o', self.tx_secs, '-i', self.rx_secs,
+                    '-b', flavour)
 
     def arrange_args_for_table(self, flavour):
         return (

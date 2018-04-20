@@ -22,13 +22,15 @@ as such part of our performance tests. (see EthernetTest in 'ethernet_test.py').
     exec_file = ''  # stub for initial testing
     times_over = 1
     count = 4
+    calibrate = 0
     _title = None
 
-    def __init__(self, reticent=0, verbose=0):
+    def __init__(self, reticent=0, verbose=0, calibrate=None):
         """
         :param reticent: non-zero => hold back output until progam until test completed.
         :param verbose:  larger values => more progress info. (not yet fully implemented)
         """
+        self.calibrate = self.calibrate and calibrate
         self.reticent = reticent
         self.verbose = verbose
         self.temp_dir = tempfile.mkdtemp(prefix=self.__class__.__name__+'_')
@@ -38,7 +40,7 @@ as such part of our performance tests. (see EthernetTest in 'ethernet_test.py').
 
     def prepare(self):
         """
-'prepare' is really just '__init__ continued!
+'prepare' is really just '__init__ continued'!
         """
         for flavour in self.get_flavours():
             table = h.table()
@@ -177,7 +179,7 @@ the resulting statistics.
                   % self.get_title())
             return ''  # barely adequate?
         self.start_time = datetime.datetime.now()
-        for time_over in range(self.times_over):
+        for time_over in range(-self.calibrate, self.times_over):
 
 # introduced the following statement late in the day so that tests that do their own
 # iteration making ours superfluous (e.g. iperf3) can be handled more simply.
@@ -185,18 +187,22 @@ the resulting statistics.
             self.time_over = time_over
             for flavour, (table, stats) in self.accumulator.items():
                 rc, output = self.run(*self.get_args(flavour))
+                if time_over < 0:  # i.e. if calibrating
+                    print("presss Enter when calibration is finished:")
+                    s_calibrated = sys.stdin.readline()  # how can we work this into the table?
+                    continue
                 numbers, results_for_table = self.inspect(flavour, rc, output, stats)
                 result_headers, result_details = zip(*results_for_table)
                 dbg_print("result headers, details: ", result_headers, result_details)
                 stats.append(numbers)
-                if time_over is 0:
+                if time_over == 0:  # i.e first actual measuring run (not calibration)
                     table |= (h.tr() | (
                         h.th(Class='output') | 'seqno.',
                         [(h.th(Class='output') | header)
                          for header in result_headers]
                     ))
                 table |= (h.tr | (
-                    h.th(Class='output') | (1+time_over),
+                    h.th(Class='output') | (1 + time_over),
                     [(h.td(Class='output') |
                       ('-' if value is None else value)) for value in result_details]
                 ))
