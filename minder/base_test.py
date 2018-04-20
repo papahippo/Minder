@@ -3,7 +3,7 @@
 """
 Minder is a simple(ish) test and evaluation framework ..
 """
-import sys, os, subprocess, tempfile, datetime
+import sys, os, subprocess, tempfile, datetime, re
 from collections import OrderedDict
 from phileas import html4 as h
 
@@ -106,8 +106,7 @@ The combined stderr/stdout output is returned together with the return code.
         """
         cmd1 = self.cmd(*args)
         dbg_print(cmd1)
-        # pycharm doesn't like the statement below but python seems to be ok with it!
-        #
+
         process = subprocess.Popen(cmd1,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
@@ -179,8 +178,10 @@ the resulting statistics.
             return ''  # barely adequate?
         self.start_time = datetime.datetime.now()
         for time_over in range(self.times_over):
-# introduced the following statement late in the day so that 'single flavour' tests
-# like e.g. iperf3 can be handled more simply.
+
+# introduced the following statement late in the day so that tests that do their own
+# iteration making ours superfluous (e.g. iperf3) can be handled more simply.
+            #
             self.time_over = time_over
             for flavour, (table, stats) in self.accumulator.items():
                 rc, output = self.run(*self.get_args(flavour))
