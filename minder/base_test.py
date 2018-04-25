@@ -56,8 +56,18 @@ as such part of our performance tests. (see EthernetTest in 'ethernet_test.py').
             self.accumulator[flavour] = (table, stats)
 
     def find_device(self):
+        """
+'find_device' was introduced late in development to make 'minder' more resilient to
+occasional innocuous changes in device names; e.g. '/dev/ttyUART0' becomes '/dev/ttyUART1'
+when the physical device is unplugged and plugged back in.
+It is calledby __init__.
+It returns one of the following:
+        - The first or only eligible device name.
+        - An empty string if no device required
+        - False if a device is required but no suitable device seems to be present.
+        """
         if not self.device_name_pattern:
-            return False
+            return ''
         ok_names = [dev_name for dev_name in os.listdir('/dev')
                     if re.match(self.device_name_pattern, dev_name)]
         return ok_names and '/dev/' + ok_names[0]
@@ -101,7 +111,7 @@ Arguments are 'stringified' here so once may pass e.g. counts as integers.
                      self.pre_args +
                      (self.exec_dir + self.exec_file,) +
                      pp))
-        print("External.cmd answer = ", ' '.join(list(answer)))
+        print("cmd to be executed = ", ' '.join(list(answer)))
         return answer
 
     def fixup(self, output, error):
@@ -149,17 +159,21 @@ each containing a header text and a data value (not per se a string) to be displ
 in an HTML table.
         """
         result = re.search(r'(\d+) packets transmitted\D.(\d+)\sreceived\D+(\d+)\% packet loss,'
-                           r'.*time\s+(\d+\S+)',  # .*=\s+',
+                           r'.*time\s+(\d+)(\S+)',  # .*=\s+',
                            output)
-        transmitted, received, packet_loss, timing = (
-                result and result.groups() or [None] * 4
+        transmitted, received, packet_loss, timing, units = (
+                result and result.groups() or [None] * 5
         )
+        # following rough and ready approach might need tightening if ever we use this for real!
+        f_timing = float(timing)
+        if units == 'ms':
+            f_timing *= 0.001
         return (  # must return a couple (tuple of two items).
-            (transmitted, received),  # first item contains statistics for accumulation ...
-            (('transmitted', transmitted),  # seconds item contains data for inclusion
+            (int(transmitted), f_timing, ),  # first item contains statistics for accumulation ...
+            (('transmitted', transmitted),  # second item contains data for inclusion
              ('received', received),  # 'as is' in table.
              ('%% packet loss', packet_loss),
-             ('time', timing),
+             ('time', timing+units),
              )
         )
 
@@ -173,9 +187,9 @@ It is expected to return a sequence of pairs (tuples of length 2)
 each containing a header text and a data value (not per se a string) to be displayed
 in the 'summary' row of an HTML table.
         """
-        tx_rates, = ez_stats
-        avg_tx_rate = tx_rates and '%.2f' % (sum(tx_rates) / len(tx_rates)) or None
-        return (('avg tx rate', avg_tx_rate),
+        tx_counts, f_timings, = ez_stats
+        avg_tx_rate = f_timings and ('%.2f' % (sum(tx_counts) / sum(f_timings))) or None
+        return (('avg pkt/s', avg_tx_rate),
                 )
 
 
@@ -244,6 +258,7 @@ once after writing teh summary information.
 It returns the same html to its caller. This is ignored except on the final call, when it
 is returned (to 'main' in "__main__.py") for inclusion in an html report including this
 and possibly other tests.
+TODO: Better to maintain a single (as complete as possible) document throughout the test.
         """
         my_html = (
             h.p | (

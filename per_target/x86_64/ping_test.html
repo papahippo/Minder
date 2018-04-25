@@ -1,50 +1,53 @@
 <html><head><style>
-th, td {
+td {
+    border: 1px solid black;
     color: black;
+    text-align: center;
     font-family: verdana;
     font-size: 12px;
 }
-
+th.input {
+    background-color: #4C40CF;
+    color: white;
+    text-align: center;
+    font-family: verdana;
+    font-size: 12px;
+}
+th.output {
+    background-color: #4CAF50;
+    color: white;
+    text-align: center;
+    font-family: verdana;
+    font-size: 12px;
+}
     </style>
 </head>
 <body><p>running /home/lmyerscough/test/Minder/per_target/x86_64/ping_test.py</p>
-<p><h2>PingTest on x68/amd63 PC running Ubuntu</h2>
-<br/><table style="width:40%"><tr><th style="background-color: f0c0c0;text-align:center;border: 1px solid #ddd; padding: 8px;">host</th>
-<th style="background-color: f0c0c0;text-align:center;border: 1px solid #ddd; padding: 8px;">count</th>
+<p><h3>PingTest on x68/amd63 PC running Ubuntu</h3>
+<br/><h4>2018-04-25 12:07:17.652181: test started.<br/>2018-04-25 12:07:20.707196 test completed!<br/></h4>
+<table><tr><th class="input">host</th>
+<th class="input">count</th>
 </tr>
-<tr><td style="background-color: f0f0f0;text-align:center;border: 1px solid #ddd; padding: 8px;color:blue">localhost</td>
-<td style="background-color: f0f0f0;text-align:center;border: 1px solid #ddd; padding: 8px;color:blue">4</td>
+<tr><td class="input">localhost</td>
+<td class="input">4</td>
 </tr>
-<tr><th style="border: 1px solid #ddd; padding: 8px;background-color: a0a0f0;">seqno.</th>
-<th style="border: 1px solid #ddd; padding: 8px;background-color: a0a0f0;">transmitted</th>
-<th style="border: 1px solid #ddd; padding: 8px;background-color: a0a0f0;">received</th>
-<th style="border: 1px solid #ddd; padding: 8px;background-color: a0a0f0;">% packet loss</th>
-<th style="border: 1px solid #ddd; padding: 8px;background-color: a0a0f0;">time</th>
+<tr><th class="output">seqno.</th>
+<th class="output">transmitted</th>
+<th class="output">received</th>
+<th class="output">%% packet loss</th>
+<th class="output">time</th>
 </tr>
-<tr><th style="background-color: f0f0f0;text-align:center;border: 1px solid #ddd; padding: 8px;">1</th>
-<td style="background-color: d0d0f0;text-align:center;border: 1px solid #ddd; padding: 8px;">10</td>
-<td style="background-color: d0d0f0;text-align:center;border: 1px solid #ddd; padding: 8px;">10</td>
-<td style="background-color: d0d0f0;text-align:center;border: 1px solid #ddd; padding: 8px;">0</td>
-<td style="background-color: d0d0f0;text-align:center;border: 1px solid #ddd; padding: 8px;">9207ms</td>
+<tr><th class="output">1</th>
+<td class="output">4</td>
+<td class="output">4</td>
+<td class="output">0</td>
+<td class="output">3049ms</td>
 </tr>
-</table>
-<br/><br/><table style="width:40%"><tr><th style="background-color: f0c0c0;text-align:center;border: 1px solid #ddd; padding: 8px;">host</th>
-<th style="background-color: f0c0c0;text-align:center;border: 1px solid #ddd; padding: 8px;">count</th>
+<tr><th class="output">summary</th>
+<th class="output">avg pkt/s</th>
 </tr>
-<tr><td style="background-color: f0f0f0;text-align:center;border: 1px solid #ddd; padding: 8px;color:blue">absenthost</td>
-<td style="background-color: f0f0f0;text-align:center;border: 1px solid #ddd; padding: 8px;color:blue">4</td>
-</tr>
-<tr><th style="border: 1px solid #ddd; padding: 8px;background-color: a0a0f0;">seqno.</th>
-<th style="border: 1px solid #ddd; padding: 8px;background-color: a0a0f0;">transmitted</th>
-<th style="border: 1px solid #ddd; padding: 8px;background-color: a0a0f0;">received</th>
-<th style="border: 1px solid #ddd; padding: 8px;background-color: a0a0f0;">% packet loss</th>
-<th style="border: 1px solid #ddd; padding: 8px;background-color: a0a0f0;">time</th>
-</tr>
-<tr><th style="background-color: f0f0f0;text-align:center;border: 1px solid #ddd; padding: 8px;">1</th>
-<td style="background-color: d0d0f0;text-align:center;border: 1px solid #ddd; padding: 8px;">-</td>
-<td style="background-color: d0d0f0;text-align:center;border: 1px solid #ddd; padding: 8px;">-</td>
-<td style="background-color: d0d0f0;text-align:center;border: 1px solid #ddd; padding: 8px;">-</td>
-<td style="background-color: d0d0f0;text-align:center;border: 1px solid #ddd; padding: 8px;">-</td>
+<tr><th class="output">-</th>
+<td class="output">1.31</td>
 </tr>
 </table>
 <br/><br/></p>
