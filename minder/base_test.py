@@ -19,11 +19,13 @@ as such part of our performance tests. (see EthernetTest in 'ethernet_test.py').
     """
     pre_args = ('stdbuf', '-o0')  # stuff these in front of command.
     exec_dir = ''  # default = find executables via path mechanism
-    exec_file = ''  # stub for initial testing
+    exec_file = 'ping'  # stub for initial testing
     times_over = 1
     count = 4
     calibrate = 0
     _title = None
+    device_name_pattern = ''
+    full_device_name = ''
 
     def __init__(self, reticent=0, verbose=0, calibrate=None):
         """
@@ -36,6 +38,9 @@ as such part of our performance tests. (see EthernetTest in 'ethernet_test.py').
         self.temp_dir = tempfile.mkdtemp(prefix=self.__class__.__name__+'_')
         self.ongoing_html_file = open(self.temp_dir+'/'+"ongoing.html", 'w')
         self.accumulator = OrderedDict()
+        self.full_device_name = self.find_device()
+        if self.full_device_name:
+            print('using device name "%s"' % self.full_device_name)
         self.prepare()
 
     def prepare(self):
@@ -50,6 +55,13 @@ as such part of our performance tests. (see EthernetTest in 'ethernet_test.py').
             stats = list()
             self.accumulator[flavour] = (table, stats)
 
+    def find_device(self):
+        if not self.device_name_pattern:
+            return False
+        ok_names = [dev_name for dev_name in os.listdir('/dev')
+                    if re.match(self.device_name_pattern, dev_name)]
+        return ok_names and '/dev/' + ok_names[0]
+
     def get_title(self):
         return (self._title or self.__class__.__name__) + " on %s" % self.target_name
 
@@ -59,10 +71,10 @@ Several distinct combination of arguments are passed to each test program. One o
 these arguments (e.g. the baud rate in the case of SerialTest is used as a key in our
 test administration. The various values of this key ar referred to as 'flavours'.
 'get_flavours' returns the appropriate flavours for a particular test class.
-Exceptionally (e.g in this base class), if the test is not possible for the current
+Exceptionally , if the test is not possible for the current
 platform, an empty sequence is returned.
         """
-        return ()
+        return ('localhost',)
 
     def get_args(self, flavour):
         """
@@ -89,7 +101,7 @@ Arguments are 'stringified' here so once may pass e.g. counts as integers.
                      self.pre_args +
                      (self.exec_dir + self.exec_file,) +
                      pp))
-        print("External.cmd answer = ", answer)
+        print("External.cmd answer = ", ' '.join(list(answer)))
         return answer
 
     def fixup(self, output, error):

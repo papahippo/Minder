@@ -13,21 +13,21 @@ Class 'UsbTest' is based on 'BaseTest'. Only functions which relate to program
 'dd' and its output are subclassed. Most of the intelligence and
 "housekeeping" is inherited straight from the base class.
 A lot of stuff is defined at class level; this is done to facilitate
-tweaking of parameters (e.g. 'spiPort') in derived classes for specific targets.
+tweaking of parameters (e.g. 'device_name_pattern') in derived classes for specific targets.
     """
     exec_dir = ''  # => no explicit path needed; linux can find this command!
     exec_file = 'dd'
     times_over = 5
     kbit_rates = (2500, 3000, 5000, 6000, )
-    usbDevice = '/dev/sda2'  # typically Olliver's lightning fast disk (spare partition)
+    device_name_pattern = 'sda2'  # typically Olliver's lightning fast disk (spare partition).
     count =10
     s_block_size = '16M'
-    directions = {
-        'input':  {'source' : usbDevice , 'destination' : '/dev/zero'},
-        'output': {'source' : '/dev/zero' , 'destination' : usbDevice},
-    }
 
     def get_flavours(self):
+        self.directions = {
+            'input': {'source': self.full_device_name, 'destination': '/dev/zero'},
+            'output': {'source': '/dev/zero', 'destination': self.full_device_name},
+        }
         return self.directions.keys()
 
     def get_args(self, flavour):
@@ -38,7 +38,7 @@ tweaking of parameters (e.g. 'spiPort') in derived classes for specific targets.
     def arrange_args_for_table(self, flavour):
         return (
             ('direction', flavour),
-            ('device', self.usbDevice),
+            ('device', self.full_device_name),
             ('count', self.count),
             ('packet size', self.s_block_size),
         )

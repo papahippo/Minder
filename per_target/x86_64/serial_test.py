@@ -5,6 +5,7 @@ import target
 
 
 class SerialTest(minder.SerialTest, target.Target):
+    device_name_pattern = 'ttyUSB.+'
     ttyPort = '/dev/ttyUSB1'
 
 

@@ -14,8 +14,7 @@ class SerialTest(BaseTest):
     showOut = True  # obsolete?
     times_over = 2
     bit_rates = (115200, 250000, 500000, 1500000)
-    # default ttyPort sometimes ok on PC, but invariably overruled on SOM target.
-    ttyPort = '/dev/ttyUSB0'
+    device_name_pattern = 'ttyS.+'  # ok for olimaker; must overrule for e.g. local PC test.
     tx_secs = 30
     rx_secs = 35
     calibrate = 1
@@ -30,15 +29,15 @@ class SerialTest(BaseTest):
 
     def get_args(self, flavour):
         if self.time_over < 0:  # calibrate
-            return ('-p', self.ttyPort, '-y', self.pattern_byte, '-z', 0x00,
+            return ('-p', self.full_device_name, '-y', self.pattern_byte, '-z', 0x00,
                     '-b', flavour)
         else:  # measuring
-            return ('-p', self.ttyPort, '-o', self.tx_secs, '-i', self.rx_secs,
+            return ('-p', self.full_device_name, '-o', self.tx_secs, '-i', self.rx_secs,
                     '-b', flavour)
 
     def arrange_args_for_table(self, flavour):
         return (
-            ('ttyPort', self.ttyPort),
+            ('full_device_name', self.full_device_name),
             ('bit ("baud") rate', flavour),
             ('transmit seconds', self.tx_secs),
             ('receive seconds', self.rx_secs),

@@ -13,14 +13,14 @@ Class 'SpiTest' is based on 'BaseTest'. Only functions which relate to program
 'spi_dev_test' and its output are subclassed. Most of the intelligence and
 "housekeeping" is inherited straight from the base class.
 A lot of stuff is defined at class level; this is done to facilitate
-tweaking of parameters (e.g. 'spiPort') in derived classes for specific targets.
+tweaking of parameters (e.g. 'full_device_name') in derived classes for specific targets.
     """
     exec_dir = ''  # under review
     exec_file = 'spidev_test'
     showOut = True
     times_over = 2
     kbit_rates = (2500, 3000, 5000, 6000, )
-    spiPort = '/dev/spidev1.0'
+    device_name_pattern = 'spi.+'
     iterations_dict = {}  # gets filled in later
     packet_size = 256
     # 'dividend' represents a hack to make sure we test long enough to get
@@ -45,13 +45,14 @@ of a long repeated packet. This makes it easier to check the frame timing on a s
 TODO: make these changes official or at least easily findable!
 
         """
-        return ('-D', self.spiPort, '-s', flavour*1000, '-I', self.iterations_dict[flavour],
+        return ('-D', self.full_device_name, '-s', flavour*1000,
+                '-I', self.iterations_dict[flavour],
                 '-o', 'results.bin', '-p', '\x80\x80\x80\x80',
                 '-S', self.packet_size, '-B')
 
     def arrange_args_for_table(self, flavour):
         return (
-            ('SPI port', self.spiPort),
+            ('SPI port', self.full_device_name),
             ('Kbits/second', flavour),
             ('packet size', self.packet_size),
             ('iterations', self.iterations_dict[flavour]),
