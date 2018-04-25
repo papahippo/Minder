@@ -5,7 +5,8 @@ Minder is a simple(ish) test and evaluation framework ..
 """
 import sys, os, subprocess, tempfile, datetime, re
 from collections import OrderedDict
-from phileas import html4 as h
+from phileas import html5 as h
+from .style import Style
 
 dbg_print = (int(os.getenv('MINDER_DBG', 0)) and print) or (lambda *pp, **kw: None)
 
@@ -27,11 +28,13 @@ as such part of our performance tests. (see EthernetTest in 'ethernet_test.py').
     device_name_pattern = ''
     full_device_name = ''
 
-    def __init__(self, reticent=0, verbose=0, calibrate=None):
+    def __init__(self, script_name='(script name?)',
+                 reticent=0, verbose=0, calibrate=None):
         """
         :param reticent: non-zero => hold back output until progam until test completed.
         :param verbose:  larger values => more progress info. (not yet fully implemented)
         """
+        self.script_name = script_name
         self.calibrate = self.calibrate and calibrate
         self.reticent = reticent
         self.verbose = verbose
@@ -47,6 +50,13 @@ as such part of our performance tests. (see EthernetTest in 'ethernet_test.py').
         """
 'prepare' is really just '__init__ continued'!
         """
+        # TODO: name should include date and time - implemented 25apr18 to be validated!
+        self.start_time = datetime.datetime.now()
+        s_now = str(self.start_time)[:19].replace(' ', '_')
+        if not s_now.startswith('20'):
+            print("WARNING: date not set; perhaps you ought to do (e.g.) 'ntpdate' first?")
+        self.html_filename = (sys.argv and sys.argv[0] or
+                         (os.path.splitext(self.script_name)[0] + '_' + s_now + '.html'))
         for flavour in self.get_flavours():
             table = h.table()
             headers, values = zip(*self.arrange_args_for_table(flavour))
@@ -54,6 +64,19 @@ as such part of our performance tests. (see EthernetTest in 'ethernet_test.py').
             table |= (h.tr() | [(h.td(Class='input') | value) for value in values])
             stats = list()
             self.accumulator[flavour] = (table, stats)
+        self.html = h.html | (
+            h.style | Style(),
+            h.body | (
+                h.p | (
+                    h.h3 | self.get_title(), h.br,
+                    h.h4 |  ("running %s" % self.script_name),
+                    ("%s: test started." % self.start_time, h.br,
+    # under review! ...                        "%s %s" % (datetime.datetime.now(),  self.status_string), h.br,
+                            ),
+                    [(table, h.br*2) for table, stats in self.accumulator.values()]
+                )
+            )
+        )
 
     def find_device(self):
         """
@@ -210,10 +233,7 @@ the resulting statistics.
             print("'%s' is not runnable on this platform"
                   % self.get_title())
             return ''  # barely adequate?
-        #TODO: make sure date has been set!
-        self.start_time = datetime.datetime.now()
         for time_over in range(-self.calibrate, self.times_over):
-
 # introduced the following statement late in the day so that tests that do their own
 # iteration making ours superfluous (e.g. iperf3) can be handled more simply.
             #
@@ -267,16 +287,5 @@ is returned (to 'main' in "__main__.py") for inclusion in an html report includi
 and possibly other tests.
 TODO: Better to maintain a single (as complete as possible) document throughout the test.
         """
-        my_html = (
-            h.p | (
-                h.h3 | self.get_title(), h.br,
-                h.h4 | ("%s: test started." % self.start_time, h.br,
-                        "%s %s" % (datetime.datetime.now(),  status_string), h.br,
-                        ),
-                [(table, h.br*2) for table, stats in self.accumulator.values()]
-            )
-        )
-        self.ongoing_html_file.seek(0, 0)
-        print(my_html, file=self.ongoing_html_file)
-        self.ongoing_html_file.flush()
-        return my_html
+        with open(self.html_filename, 'w') as html_file:
+            print(self.html, file=html_file)
