@@ -22,18 +22,25 @@ tweaking of parameters (e.g. 'device_name_pattern') in derived classes for speci
     device_name_pattern = 'sda2'  # typically Olliver's lightning fast disk (spare partition).
     count =10
     s_block_size = '16M'
-
+#TODO: umount necessary? preconditions? to be discussed.
     def get_flavours(self):
         self.directions = {
-            'input': {'source': self.full_device_name, 'destination': '/dev/zero'},
-            'output': {'source': '/dev/zero', 'destination': self.full_device_name},
-        }
+            'input': {'source': self.full_device_name,
+                      'destination': '/dev/zero',
+                      'extra_args': (),
+                      },
+            'output': {'source': '/dev/zero',
+                       'destination': self.full_device_name,
+                       'extra_args': ('conv=fdatasync',)
+                       },
+                            }
         return self.directions.keys()
 
     def get_args(self, flavour):
+#TODO: sort out datasync business. Done! to be validated.
         df = self.directions[flavour]
         return ('if=' + df['source'], 'of=' + df['destination'], # 'conv=fdatasync',
-                'bs=' + self.s_block_size, 'count=%d' % self.count)
+                'bs=' + self.s_block_size, 'count=%d' % self.count) + df['extra_args']
 
     def arrange_args_for_table(self, flavour):
         return (

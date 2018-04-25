@@ -135,6 +135,10 @@ The combined stderr/stdout output is returned together with the return code.
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT)
         output = ''
+ #TODO: 'wait' here if reticent. implemented; not yet validated.
+        if self.reticent:
+            dbg_print ('Minder.run waiting before reading output')
+            process.wait()
         for line_bytes in process.stdout:
             line_str = line_bytes.decode('utf8', errors='ignore')
 
@@ -145,7 +149,9 @@ The combined stderr/stdout output is returned together with the return code.
             output += line_str
         # kind of broken 'for now'  ...
         # output, error = self.fixup(output, error)
-        return process.returncode, output
+        dbg_print('Minder.run waiting after reading output')
+        rc = process.wait()
+        return rc, output
 
     def inspect(self, flavour, rc, output, stats):
         """
@@ -204,6 +210,7 @@ the resulting statistics.
             print("'%s' is not runnable on this platform"
                   % self.get_title())
             return ''  # barely adequate?
+        #TODO: make sure date has been set!
         self.start_time = datetime.datetime.now()
         for time_over in range(-self.calibrate, self.times_over):
 
