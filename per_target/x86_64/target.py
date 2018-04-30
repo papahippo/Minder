@@ -1,2 +1,2 @@
 class Target:
-    target_name = "x68/amd63 PC running Ubuntu"
+    target_name = "x68orAmd64pc"

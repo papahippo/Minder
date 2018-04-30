@@ -38,8 +38,8 @@ as such part of our performance tests. (see EthernetTest in 'ethernet_test.py').
         self.calibrate = self.calibrate and calibrate
         self.reticent = reticent
         self.verbose = verbose
+# tempfile usage is no longer generic, now that full html file is written every time.
         self.temp_dir = tempfile.mkdtemp(prefix=self.__class__.__name__+'_')
-        self.ongoing_html_file = open(self.temp_dir+'/'+"ongoing.html", 'w')
         self.accumulator = OrderedDict()
         self.full_device_name = self.find_device()
         if self.full_device_name:
@@ -52,11 +52,12 @@ as such part of our performance tests. (see EthernetTest in 'ethernet_test.py').
         """
         # TODO: name should include date and time - implemented 25apr18 to be validated!
         self.start_time = datetime.datetime.now()
-        s_now = str(self.start_time)[:19].replace(' ', '_')
+        s_now = str(self.start_time)[:19]
         if not s_now.startswith('20'):
             print("WARNING: date not set; perhaps you ought to do (e.g.) 'ntpdate' first?")
-        self.html_filename = (sys.argv and sys.argv[0] or
-                         (os.path.splitext(self.script_name)[0] + '_' + s_now + '.html'))
+        self.html_filename = (os.path.splitext(self.script_name)[0] + '_'
+                          + self.target_name + '_'
+                          + s_now + '.html').replace(' ', '_')
         for flavour in self.get_flavours():
             table = h.table()
             headers, values = zip(*self.arrange_args_for_table(flavour))
