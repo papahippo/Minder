@@ -135,7 +135,7 @@ Arguments are 'stringified' here so once may pass e.g. counts as integers.
                      self.pre_args +
                      (self.exec_dir + self.exec_file,) +
                      pp))
-        print("cmd to be executed = ", ' '.join(list(answer)))
+        #  print("cmd to be executed = ", ' '.join(list(answer)))
         return answer
 
     def fixup(self, output, error):

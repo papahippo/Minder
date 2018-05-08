@@ -47,7 +47,7 @@ TODO: make these changes official or at least easily findable!
         """
         return ('-D', self.full_device_name, '-s', flavour*1000,
                 '-I', self.iterations_dict[flavour],
-                '-o', 'results.bin', '-p', '\x80\x80\x80\x80',
+                '-o', 'results.bin', '-p', '@@@@',
                 '-S', self.packet_size, '-B')
 
     def arrange_args_for_table(self, flavour):
