@@ -25,7 +25,7 @@ tweaking of parameters (e.g. 'full_device_name') in derived classes for specific
     packet_size = 256
     # 'dividend' represents a hack to make sure we test long enough to get
     #  at least one rate report from spi_dev_test!
-    dividend = 60000
+    multiplier = 1000
 
     def get_flavours(self):
         """
@@ -33,7 +33,7 @@ This 'get_flavours' is a little more complicated than that of other [Device]Test
 fudge the arguments to make the would-be quicker tests run unnaturally longer.
         """
         for flavour in self.kbit_rates:
-            self.iterations_dict[flavour] = int((self.dividend*self.packet_size)/flavour)
+            self.iterations_dict[flavour] = int(self.multiplier*(flavour / self.packet_size))
         return self.kbit_rates
 
     def get_args(self, flavour):
