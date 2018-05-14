@@ -9,9 +9,9 @@ class EthernetTest(BaseTest):
     times_over = 10
     count = 4
     _title = None
-    iperf4_hosts = ('localhost',)
+    iperf3_hosts = ('localhost',)
     def get_flavours(self):
-        return self.iperf4_hosts
+        return self.iperf3_hosts
 
     def get_args(self, flavour):
         return '-c', flavour

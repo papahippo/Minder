@@ -5,7 +5,7 @@ import target
 
 
 class EthernetTest(minder.EthernetTest, target.Target):
-    iperf4_hosts = ('192.168.1.42',)
+    iperf3_hosts = ('192.168.1.42',)
 
 
 if __name__ == "__main__":
